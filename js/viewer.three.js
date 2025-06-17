@@ -3,6 +3,35 @@ class Viewer {
   static Init() {
     Viewer.ViewerControl = new ViewerControl();
   }
+  static Clear() {
+    if (Viewer.ViewerControl) {
+      Viewer.ViewerControl.ClearModels();
+    } else {
+      console.error("ViewerControl is not initialized.");
+    }
+  }
+  static Cube() {
+    if (Viewer.ViewerControl) {
+      Viewer.ViewerControl.CreateCube();
+    } else {
+      console.error("ViewerControl is not initialized.");
+    }
+  }
+  static Model(data) {
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) {
+        console.error("Error parsing model JSON:", e);
+        return;
+      }
+    }
+    if (Viewer.ViewerControl) {
+      Viewer.ViewerControl.CreateMesh(data);
+    } else {
+      console.error("ViewerControl is not initialized.");
+    }
+  }
 }
 
 class ViewerControl {
@@ -68,16 +97,36 @@ class ViewerControl {
       this.CreateCube();
     }
 
-    if (this.settings.model)
-    {
-      var {vertices, faces} = this.settings.model;
-      var model = new Model3d();
-      model.AddVertices(vertices);
-      model.AddFaces(faces);
-      this.AddModel(model.CreateMesh(), true);
+    if (this.settings.model) {
+      this.CreateMesh(this.settings.model)
     }
 
     this.Render();
+  }
+
+  CreateMesh(data) {
+    try {
+      var { vertices, faces, position, rotation, quaternion, scale } = data;
+      var model = new Model3d();
+      model.AddVertices(vertices);
+      model.AddFaces(faces);
+      var mesh = model.CreateMesh();
+      if (rotation && Array.isArray(rotation) && rotation.length === 3) {
+        mesh.rotation.set(rotation[0], rotation[1], rotation[2]);
+      }
+      if (quaternion && Array.isArray(quaternion) && quaternion.length === 4) {
+        mesh.quaternion.set(quaternion[0], quaternion[1], quaternion[2], quaternion[3]);
+      }
+      if (position && Array.isArray(position) && position.length === 3) {
+        mesh.position.set(position[0], position[1], position[2]);
+      }
+      if (scale && Array.isArray(scale) && scale.length === 3) {
+        mesh.scale.set(scale[0], scale[1], scale[2]);
+      }
+      this.AddModel(mesh, true);
+    } catch (error) {
+      console.error("Error creating mesh from data:", error);
+    }
   }
 
   SetRotateControls(rotate) {
@@ -216,7 +265,7 @@ class ViewerControl {
     // Resize
     window.addEventListener("resize", () => {
       console.log("Resize event triggered");
-      
+
       var aspect = window.innerWidth / window.innerHeight;
       if (this.camera.aspect) {
         this.camera.aspect = aspect;
@@ -251,6 +300,9 @@ class ViewerControl {
       var edges = new THREE.EdgesGeometry(model.geometry);
       model.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }));
       model.edges.position.copy(model.position);
+      model.edges.rotation.copy(model.rotation);
+      model.edges.scale.copy(model.scale);
+      model.edges.quaternion.copy(model.quaternion);
       this.scene.add(model.edges);
     }
 
@@ -268,6 +320,16 @@ class ViewerControl {
     } else {
       console.warn("Model not found in the scene.");
     }
+  }
+  ClearModels() {
+    for (const model of this.models) {
+      this.scene.remove(model);
+      if (model.edges) {
+        this.scene.remove(model.edges);
+      }
+    }
+    this.models = [];
+    this.Render();
   }
   Render(zoomFit = false) {
     if (zoomFit) {
@@ -377,8 +439,7 @@ class Model3d {
   }
   AddFace(indices, color = undefined) {
 
-    if (!Array.isArray(indices))
-    {
+    if (!Array.isArray(indices)) {
       console.error("Indices must be an array.");
       return;
     }

@@ -37,16 +37,16 @@
     <script>
         Viewer.Init();
         //Viewer.ViewerControl.CreateCube();
-
-        var model3d = new Model3d();
         /*
-        model3d.AddVertex(0, 0, 10);
-        model3d.AddVertex(1, 0, 10);
-        model3d.AddVertex(1, 1, 10);
-        model3d.AddVertex(0, 1, 10);
-        model3d.AddFace([0, 1, 2, 0, 2, 3], "#ff0000");
-        model3d.AddFace([0, 2, 1, 2, 0, 3, "#ffff00"]);
-        */
+        var model3d = new Model3d();
+        
+        //model3d.AddVertex(0, 0, 10);
+        //model3d.AddVertex(1, 0, 10);
+        //model3d.AddVertex(1, 1, 10);
+        //model3d.AddVertex(0, 1, 10);
+        //model3d.AddFace([0, 1, 2, 0, 2, 3], "#ff0000");
+        //model3d.AddFace([0, 2, 1, 2, 0, 3, "#ffff00"]);
+        
         // {"vertices": [0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1], "faces": [[0, 2, 1, 2, 0, 3, "#ff0000"], [4, 5, 6, 4, 6, 7, "#00ff00"], [0, 1, 5, 0, 5, 4, "#ff00ff"], [1, 2, 6, 1, 6, 5, "#00ffff"], [2, 3, 7, 2, 7, 6, "#ff8800"], [3, 0, 4, 3, 4, 7, "#8800ff"]]}
         model3d.AddVertices([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
         model3d.AddFace([0, 2, 1, 2, 0, 3, "#ff0000"]);
@@ -57,8 +57,16 @@
         model3d.AddFace([3, 0, 4, 3, 4, 7], "#8800ff");
 
         var model = model3d.CreateMesh();
+        model.position.set(0, 0, 2);
 
-        //Viewer.ViewerControl.AddModel(model, true);
+        Viewer.ViewerControl.AddModel(model, true);
+
+        Viewer.Clear();
+        Viewer.Model({ "vertices": [-1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1, -1, -1, 1, 1, -1, 1, 1, 1, 1, -1, 1, 1], "faces": [[0, 2, 1, 2, 0, 3, "#ff0000"], [4, 5, 6, 4, 6, 7, "#00ff00"], [0, 1, 5, 0, 5, 4, "#ff00ff"], [1, 2, 6, 1, 6, 5, "#00ffff"], [2, 3, 7, 2, 7, 6, "#ff8800"], [3, 0, 4, 3, 4, 7, "#8800ff"]] });
+        Viewer.Model({ "position": [0, 0, 5], "rotation": [0, 0, 1], "vertices": [0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1], "faces": [[0, 2, 1, 2, 0, 3, "#ff0000"], [4, 5, 6, 4, 6, 7, "#00ff00"], [0, 1, 5, 0, 5, 4, "#ff00ff"], [1, 2, 6, 1, 6, 5, "#00ffff"], [2, 3, 7, 2, 7, 6, "#ff8800"], [3, 0, 4, 3, 4, 7, "#8800ff"]] });
+        Viewer.Model({ "position": [0, 0, 4], "scale": [0.5, 0.5, 0.5], "vertices": [0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1], "faces": [[0, 2, 1, 2, 0, 3, "#ff0000"], [4, 5, 6, 4, 6, 7, "#00ff00"], [0, 1, 5, 0, 5, 4, "#ff00ff"], [1, 2, 6, 1, 6, 5, "#00ffff"], [2, 3, 7, 2, 7, 6, "#ff8800"], [3, 0, 4, 3, 4, 7, "#8800ff"]] });
+        Viewer.Model({ "position": [0, 0, 2], "quaternion": [0, 0, 1.2, 0], "vertices": [0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1], "faces": [[0, 2, 1, 2, 0, 3, "#ff0000"], [4, 5, 6, 4, 6, 7, "#00ff00"], [0, 1, 5, 0, 5, 4, "#ff00ff"], [1, 2, 6, 1, 6, 5, "#00ffff"], [2, 3, 7, 2, 7, 6, "#ff8800"], [3, 0, 4, 3, 4, 7, "#8800ff"]] });
+        */
     </script>
 </body>
 
