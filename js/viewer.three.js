@@ -264,8 +264,6 @@ class ViewerControl {
 
     // Resize
     window.addEventListener("resize", () => {
-      console.log("Resize event triggered");
-
       var aspect = window.innerWidth / window.innerHeight;
       if (this.camera.aspect) {
         this.camera.aspect = aspect;
