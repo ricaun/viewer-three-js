@@ -154,22 +154,29 @@ function off_mesh(offJson = undefined)
     return mesh;
 }
 
-function off_to_geometry(off)
+function off_to_geometry_(_vertices, _faces)
 {
     const geometry = new THREE.BufferGeometry();
 
-    const vertices = off.Vertices.map(v => new THREE.Vector3(v.X, v.Y, v.Z));
-    const faces = off.Faces.map(f => {
-        const indices = f.Indices;
-        const color = new THREE.Color(f.Color.R, f.Color.G, f.Color.B);
-        const alpha = f.Color.A || 1.0;
-        return { indices, color, alpha };
+    const vertices = _vertices.flatMap(vertex => [vertex.x, vertex.y, vertex.z]);
+    const faces = _faces.map(f => {
+        const indices = f.indices ?? [];
+        const color = { r: f.color.r ?? 1.0, 
+                        g: f.color.g ?? 1.0, 
+                        b: f.color.b ?? 1.0,
+                        a: f.color.a ?? 1.0 
+                      };
+        return { indices, color };
     });
     
     const materials = [];
     for (const face of faces) {
         const color = new THREE.Color(face.color.r, face.color.g, face.color.b);
-        const material = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: face.alpha });
+        const material = new THREE.MeshBasicMaterial({ 
+          color: color, 
+          transparent: true, 
+          opacity: face.color.a 
+        });
         materials.push(material);
     }
 
@@ -188,32 +195,20 @@ function off_to_geometry(off)
         index++;
     }
 
-    //geometry.addGroup(0, indices.length, 0);
-
-    
-
-    const positions = [];
-    const colors = [];
-
-    for (const vertex of vertices) {
-        positions.push(vertex.x, vertex.y, vertex.z);
-    }
-
-    for (const face of faces) {
-        for (let i = 0; i < face.indices.length; i++) {
-            const index = face.indices[i];
-            colors.push(face.color.r, face.color.g, face.color.b);
-        }
-    }
-
-    geometry.setIndex(new THREE.BufferAttribute(new Uint16Array(indices), 1));
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-
-    //geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    geometry.setIndex(indices);
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
 
     geometry.computeVertexNormals();
 
     return {geometry, materials};
+}
+
+
+function off_to_geometry(_data)
+{
+    var data = convert_object_lowcase(_data);
+
+    return off_to_geometry_(data.vertices, data.faces);
 }
 
 function convert_object_lowcase(value)
