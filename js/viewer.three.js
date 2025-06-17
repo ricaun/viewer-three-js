@@ -100,6 +100,11 @@ class ViewerControl {
           this.Render(true);
         }
         lastClickTime = now;
+
+        // Prevent default action for middle mouse button
+        // This is to prevent the browser from scrolling when middle mouse button is clicked
+        if (event.button === 1)
+          event.preventDefault();
       }
     });
 
