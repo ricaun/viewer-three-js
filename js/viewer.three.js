@@ -78,6 +78,7 @@ class ViewerControl {
     document.body.appendChild(this.renderer.domElement);
 
     this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.mouseButtons.MIDDLE = THREE.MOUSE.PAN; // Change middle mouse button to pan
     this.controls.addEventListener('change', () => { this.Render(); });
     this.controls.update();
 
