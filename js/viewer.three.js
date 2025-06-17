@@ -49,7 +49,7 @@ class ViewerControl {
   constructor() {
     this.settings = this.GetSettingHash();
     console.log("Viewer settings:", this.settings);
-
+    
     THREE.Object3D.DefaultUp.set(0, 0, 1);
     if (this.settings.up) {
       var up = this.settings.up;
