@@ -21,10 +21,12 @@
     <script src="./js/dotbim.three.js"></script>
     <script src="./js/main.js"></script>
     <script src="./js/three.js"></script>
-
+    
     <script src="./js/controls/OrbitControls.js"></script>
     <script src="./js/controls/SVGRenderer.js"></script>
     <script src="./js/controls/Projector.js"></script>
+    
+    <script src="./js/viewer.three.js"></script>
 
     <!--  models.js  -->
     <script src="./js/samples.js"></script>
@@ -32,6 +34,7 @@
 
 <body>
     <script>
+        Viewer.Init();
 
         function GetHash(name, defaultValue) {
             var hash = window.location.hash;
@@ -107,7 +110,7 @@
         }
 
         // Configure renderer size
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setSize(window.innerWidth/2, window.innerHeight/2);
 
         // Append Renderer to DOM
         document.body.appendChild(renderer.domElement);
@@ -459,8 +462,9 @@
         //LoadDotBim(JSON.stringify(dotbim_cube));
         //LoadDotBim(JSON.stringify(dotbim_banana));
         //CreateCube(0xE67373);
+        CreateCube();
         {
-
+            /*
             var geo = off_mesh();
             scene.add(geo);
 
@@ -505,7 +509,7 @@
             var triangle = new THREE.Mesh(bufferGeometry, materials);
             triangle.position.set(0, 0, 0);
             scene.add(triangle);
-            
+            */
             zoomCameraToSelection(camera, controls, scene.children);
             render();
         }
