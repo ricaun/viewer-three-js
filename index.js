@@ -1,0 +1,480 @@
+
+        function GetHash(name, defaultValue) {
+            var hash = window.location.hash;
+            if (hash && hash.length > 1) {
+                var parts = hash.substring(1).split('&');
+                for (var i = 0; i < parts.length; i++) {
+                    var pair = parts[i].split('=');
+                    if (pair[0] === name) {
+                        return decodeURIComponent(pair[1]);
+                    }
+                }
+            }
+            return defaultValue;
+        }
+
+        // #camera=orthographic&position=100,0,0
+        // #camera=perspective&position=100,0,0
+
+        // DefaultUp
+        THREE.Object3D.DefaultUp.set(0, 0, 1);
+
+        // Create an empty scene
+        var scene = new THREE.Scene();
+
+        // Create a basic perspective camera
+        var cameraDistance = 100;
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
+        var viewSize = 10;
+        var aspectRatio = window.innerWidth / window.innerHeight;
+
+        var lightType = GetHash("light", "hemisphere"); // "hemisphere" or "directional"
+
+        var cameraType = "orthographic"; // "perspective" or "orthographic"
+        cameraType = GetHash("camera", cameraType);
+        if (cameraType === "orthographic")
+        {
+            camera = new THREE.OrthographicCamera(
+                -aspectRatio * viewSize / 2, aspectRatio * viewSize / 2,
+                viewSize / 2, -viewSize / 2,
+                0.1, 1000);
+        }
+            
+        function UpdateCameraPosition() {
+            camera.position.set(cameraDistance, -cameraDistance, cameraDistance);
+
+            var cameraPosition = GetHash("position", camera.position.x + "," + camera.position.y + "," + camera.position.z);
+            if (cameraPosition) {
+                var parts = cameraPosition.split(',');
+                if (parts.length === 3) {
+                    camera.position.set(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]));
+                }
+            }
+        }
+
+        UpdateCameraPosition();
+
+        // Create a renderer with Antialiasing
+        var renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            //autoSize: true,
+            alpha: true
+        });
+
+        renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+
+        // Configure renderer clear color
+        renderer.setClearColor("#222");
+
+        // PixelRatio
+        if (window.devicePixelRatio) {
+            renderer.setPixelRatio(window.devicePixelRatio);
+        }
+
+        // Configure renderer size
+        renderer.setSize(window.innerWidth/2, window.innerHeight/2);
+
+        // Append Renderer to DOM
+        document.body.appendChild(renderer.domElement);
+
+        // ------------------------------------------------
+        // EVENTS
+        // ------------------------------------------------
+
+        // dragover and drop
+        document.addEventListener('dragover', function (event) {
+            event.preventDefault();
+        });
+        document.addEventListener('drop', function (event) {
+            event.preventDefault();
+            var files = event.dataTransfer.files;
+            Clear();
+            for (let file of files) {
+                console.log(file);
+                const reader = new FileReader();
+                reader.addEventListener('load', (event) => {
+                    var content = event.target.result;
+                    /*
+                    console.log(content);
+                    var json = JSON.parse(content);
+                    var g = off_mesh(json);
+                    scene.add(g);
+                    zoomCameraToSelection(camera, controls, scene.children);
+                    render();
+                    */
+                    LoadDotBim(content);
+                });
+                reader.readAsText(file);
+            }
+        });
+
+        function downloadDataUrlFromJavascript(filename, dataUrl) {
+
+            // Construct the 'a' element
+            var link = document.createElement("a");
+            link.download = filename;
+            link.target = "_blank";
+
+            // Construct the URI
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+
+            // Cleanup the DOM
+            document.body.removeChild(link);
+            delete link;
+        }
+
+        function SvgExportClick(){
+                
+            // add ambient light to make SVGRenderer happy
+            var ambient = new THREE.AmbientLight( 'white' );
+            scene.add( ambient );
+                    
+            try {
+                // the original code
+                var rendererSVG = new THREE.SVGRenderer();
+                rendererSVG.setSize(window.innerWidth, window.innerHeight);			
+                rendererSVG.render( scene, camera );	
+                
+                const svgData = new XMLSerializer().serializeToString(rendererSVG.domElement);
+                const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+                const svgUrl = URL.createObjectURL(svgBlob);
+                const downloadLink = document.createElement('a');
+                downloadLink.href = svgUrl;
+                downloadLink.download = 'scene.svg';
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+    
+            } catch (error) {
+                Clear();
+                console.error("SVGRenderer is not available. Please include the SVGRenderer script.");
+                console.error(error);
+            }
+            
+            // remove the ambient light		
+            scene.remove( ambient );
+        }
+
+        function PngExportClick()
+        {
+            let renderWidth = window.innerWidth;
+            let renderHeight = window.innerHeight;
+
+            if (window.devicePixelRatio) {
+                renderWidth *= window.devicePixelRatio;
+                renderHeight *= window.devicePixelRatio;
+            }
+
+            let clearAlpha = renderer.getClearAlpha ();
+            renderer.setClearAlpha (0.0);
+            renderer.setSize (renderWidth, renderHeight);
+            render();
+            const imgDataUrl = renderer.domElement.toDataURL();
+            downloadDataUrlFromJavascript( "image.png", imgDataUrl);
+            renderer.setClearAlpha (clearAlpha);
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function CreateCube(color = undefined) {
+            var material = new THREE.MeshNormalMaterial();
+            if (color !== undefined) {
+                material = new THREE.MeshStandardMaterial({
+                    color: color,
+                });
+            }
+
+            var cube = new THREE.Mesh(
+                new THREE.BoxGeometry(1, 1, 1),
+                material
+            );
+            cube.position.set(Math.random() * 10 - 5, Math.random() * 10 - 5, Math.random() * 10 - 5);
+            scene.add(cube);
+            var edges = new THREE.EdgesGeometry(cube.geometry);
+            cube.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }));
+            cube.edges.position.copy(cube.position);
+            scene.add(cube.edges);
+            zoomCameraToSelection(camera, controls, scene.children);
+            render();
+        }
+
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "0") {
+                SvgExportClick();
+            }
+            if (event.key === "1") {
+                renderer.setClearColor("#222");
+            }
+            if (event.key === "2") {
+                renderer.setClearColor("#fefefe");
+            }
+            if (event.key === "3") {
+                renderer.setClearColor("#000", 0);
+            }
+            if (event.key === "d") {
+                CreateCube(Math.random() * 0xffffff);
+            }
+            if (event.key === "f") {
+                CreateCube(undefined);
+            }
+            if (event.key === "c") {
+                Clear();
+            }
+            if (event.key === "v") {
+                LoadDotBim(JSON.stringify(dotbim_cube));
+            }
+            if (event.key === "b") {
+                LoadDotBim(JSON.stringify(dotbim_banana));
+            }
+            if (event.key === "n") {
+                LoadDotBim(JSON.stringify(dotbim_faces));
+            }
+            if (event.key === "m") {
+                LoadDotBim(JSON.stringify(dotbim_cubes));
+            }
+            if (event.key === "z") {
+                zoomCameraToSelection(camera, controls, scene.children);
+                render();
+            }
+            if (event.key === "p") {
+                PngExportClick();
+            }
+
+            render();
+        });
+
+        // ------------------------------------------------
+        // FUN STARTS HERE
+        // ------------------------------------------------
+
+        function CreateLight() {
+            if (lightType === "directional") {
+                var light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
+                light.position.set(0.5, -1.5, 3);
+                scene.add(light);
+            } else {
+                scene.add(new THREE.HemisphereLight(0xffffff));
+            }
+        }
+
+        // Light
+        CreateLight();
+
+        // TimeOut Loop
+        var timeout = 5000;
+
+        // Render Loop
+        var renderLoop = function () {
+            setTimeout("renderLoop()", timeout);
+            render();
+        };
+
+        // Render
+        var render = function () {
+            // Render the scene
+            renderer.render(scene, camera);
+        };
+
+        render();
+        renderLoop();
+
+        // OrbitControls
+        var controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.addEventListener('change', render);
+        controls.update();
+
+        // Resize
+        window.addEventListener("resize", function () {
+            var aspect = window.innerWidth / window.innerHeight;
+            if (camera.aspect) {
+                camera.aspect = aspect;
+            }
+
+            if (camera.left) {
+                camera.left = -aspect * viewSize / 2;
+                camera.right = aspect * viewSize / 2;
+                camera.top = viewSize / 2;
+                camera.bottom = -viewSize / 2;
+            }
+
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            zoomCameraToSelection(camera, controls, scene.children);
+            render();
+        })
+
+        function zoomCameraToSelection(camera, controls, selection, fitOffset = 1.2) {
+            const box = new THREE.Box3();
+            
+            for (const object of selection) box.expandByObject(object);
+            
+            const size = box.getSize(new THREE.Vector3());
+            const center = box.getCenter(new THREE.Vector3());
+            
+            const aspect = window.innerWidth / window.innerHeight;
+            
+            if (camera.isPerspectiveCamera)
+            {
+                const maxSize = Math.max(size.x, size.y, size.z);
+                const fitHeightDistance = maxSize / (2 * Math.atan(Math.PI * camera.fov / 360));
+                const fitWidthDistance = fitHeightDistance / camera.aspect;
+                const distance = fitOffset * Math.max(fitHeightDistance, fitWidthDistance);
+
+                const direction = controls.target.clone()
+                    .sub(camera.position)
+                    .normalize()
+                    .multiplyScalar(distance);
+
+                controls.maxDistance = distance * 10;
+                controls.target.copy(center);
+                
+                camera.near = distance / 100;
+                camera.far = distance * 100;
+
+                camera.updateProjectionMatrix();
+                
+                camera.position.copy(controls.target).sub(direction);
+                
+                controls.update();
+            }
+            else if ( camera.isOrthographicCamera ) {
+                var radius = Math.max(size.x, size.y, size.z) * 1.5;
+                if (radius === 0) {
+                    radius = 1; // prevent division by zero
+                }
+
+                var viewHeight = camera.top - camera.bottom;
+                var viewWidth = camera.right - camera.left;
+
+                if( aspect > 1.0 )
+                {
+                    // if view is wider than it is tall, zoom to fit height
+                    camera.zoom = viewHeight / ( radius * fitOffset )
+                }
+                else
+                {
+                    // if view is taller than it is wide, zoom to fit width
+                    camera.zoom = viewWidth / ( radius * fitOffset )
+                }
+
+                var moveCameraToCenter = center.clone().sub(controls.target);
+                camera.position.add(moveCameraToCenter);
+                camera.updateProjectionMatrix();
+                
+                controls.target.copy(center); 
+                controls.update();
+            }
+
+            render();
+        }
+
+        var LoadDotBim = function (dotbim) {
+            //console.log(dotbim)
+            dotbim_CreateMeshes(dotbim).forEach(mesh => {
+                scene.add(mesh);
+                if (mesh.edges)
+                {
+                    scene.add(mesh.edges);
+                }
+            });
+            zoomCameraToSelection(camera, controls, scene.children);
+            render();
+        };
+
+        var Clear = function () {
+            while (scene.children.length > 0) {
+                var children = scene.children[0];
+                scene.remove(children);
+            }
+            CreateLight();
+            UpdateCameraPosition();
+            render();
+        };
+
+        var CreateText = function () {
+            var canvas1 = document.createElement('canvas');
+            var context1 = canvas1.getContext('2d');
+            context1.font = "Bold 25px Arial";
+            context1.fillStyle = "rgba(150,150,150,1)";
+            context1.fillText('Drop your BIM file', 0, 80);
+            context1.fillText('on the page...', 0, 104);
+
+            // canvas contents will be used for a texture
+            var texture1 = new THREE.Texture(canvas1)
+            texture1.needsUpdate = true;
+            
+            var material1 = new THREE.MeshBasicMaterial({
+                map: texture1,
+                side: THREE.DoubleSide
+            });
+            material1.transparent = true;
+
+            var mesh1 = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), material1 );
+            mesh1.position.set(4, -2, 0);
+
+            scene.add(mesh1)
+            render();
+        }
+
+        //CreateText();
+        //LoadDotBim(JSON.stringify(dotbim_cubes));
+        //LoadDotBim(JSON.stringify(dotbim_faces));
+        //LoadDotBim(JSON.stringify(dotbim_cube));
+        //LoadDotBim(JSON.stringify(dotbim_banana));
+        //CreateCube(0xE67373);
+        CreateCube();
+        {
+            /*
+            var geo = off_mesh();
+            scene.add(geo);
+
+            // create a face 
+            var bufferGeometry = new THREE.BufferGeometry();
+            var indices = new Uint16Array([0, 1, 2, 3, 4, 5, 2, 5, 4, 1, 2, 4]);
+            bufferGeometry.setIndex(new THREE.BufferAttribute(indices, 1));
+
+
+            var vertices = new Float32Array([
+                -1, -1, 0,
+                1, -1, 0,
+                0, 1, 0,
+                -1, -1, 1,
+                1, -1, 1,
+                0, 1, 1,
+            ]);
+            
+            bufferGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            //bufferGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            bufferGeometry.computeVertexNormals();
+            var material = new THREE.MeshBasicMaterial({ 
+                side: THREE.OneSide, 
+                color: new THREE.Color(0x33333ff), 
+                //vertexColors: true
+            });
+
+            bufferGeometry.addGroup( 0, 3, 0 ); // materialIndex 0
+            bufferGeometry.addGroup( 3, 3, 1 ); // materialIndex 1
+            bufferGeometry.addGroup( 6, 3, 2 ); // materialIndex 2
+            bufferGeometry.addGroup( 9, 3, 3 ); // materialIndex 3
+
+            var materials = [
+                new THREE.MeshLambertMaterial( { color: 0xff0000 } ),
+                new THREE.MeshStandardMaterial( { color: 0x00ff00 } ),
+                new THREE.MeshPhongMaterial( { color: 0x0000ff } ),
+                new THREE.MeshDepthMaterial(),
+                new THREE.MeshNormalMaterial(),
+                new THREE.MeshBasicMaterial( { wireframe: true } ),
+            ];
+
+            var triangle = new THREE.Mesh(bufferGeometry, materials);
+            triangle.position.set(0, 0, 0);
+            scene.add(triangle);
+            */
+            zoomCameraToSelection(camera, controls, scene.children);
+            render();
+        }
+
+        //CreateCube(0xeeeeee);

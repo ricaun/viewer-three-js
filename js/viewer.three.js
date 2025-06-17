@@ -19,11 +19,10 @@ class ViewerControl {
 
   constructor() {
     this.settings = this.GetSettingHash();
-    // console.log("Viewer settings:", this.settings);
+    console.log("Viewer settings:", this.settings);
 
     THREE.Object3D.DefaultUp.set(0, 0, 1);
-    if (this.settings.up)
-    {
+    if (this.settings.up) {
       var up = this.settings.up;
       if (Array.isArray(up) && up.length === 3) {
         THREE.Object3D.DefaultUp.set(up[0], up[1], up[2]);
@@ -45,7 +44,7 @@ class ViewerControl {
     }
 
     // Configure renderer size
-    this.renderer.setSize(window.innerWidth / 4, window.innerHeight / 4);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     document.body.appendChild(this.renderer.domElement);
 
@@ -65,17 +64,25 @@ class ViewerControl {
     this.SetEdges(this.settings.edges);
 
     this.CreateLight();
-    if (this.settings.cube)
+    if (this.settings.cube) {
       this.CreateCube();
+    }
+
+    if (this.settings.model)
+    {
+      var {vertices, faces} = this.settings.model;
+      var model = new Model3d();
+      model.AddVertices(vertices);
+      model.AddFaces(faces);
+      this.AddModel(model.CreateMesh(), true);
+    }
 
     this.Render();
   }
 
-  SetRotateControls(rotate)
-  {
+  SetRotateControls(rotate) {
     if (this.controls) {
-      if (typeof rotate === 'boolean')
-      {
+      if (typeof rotate === 'boolean') {
         this.controls.enableRotate = rotate;
         this.controls.update();
         this.Render();
@@ -106,8 +113,7 @@ class ViewerControl {
       if (!color.startsWith('#')) color = '#' + color;
       color = new THREE.Color(color);
     }
-    else
-    {
+    else {
       color = "#222"; // Default color if not provided
     }
     this.renderer.setClearColor(color);
@@ -152,9 +158,25 @@ class ViewerControl {
       var parts = hash.substring(1).split('&');
       for (var i = 0; i < parts.length; i++) {
         var pair = parts[i].split('=');
-        var value = decodeURIComponent(pair[1] || '');
-        // contains `,` split by `,`
-        if (value.includes(',')) {
+        var key = decodeURIComponent(pair[0]);
+        var value = decodeURIComponent(pair.slice(1).join('='));
+        if (value.startsWith('{') && value.endsWith('}')) {
+          try {
+            value = JSON.parse(value);
+          } catch (e) {
+            console.error("Error parsing JSON value:", value, e);
+            value = {};
+          }
+        }
+        else if (value.startsWith('[') && value.endsWith(']')) {
+          try {
+            value = JSON.parse(value);
+          } catch (e) {
+            console.error("Error parsing JSON array value:", value, e);
+            value = [];
+          }
+        }
+        else if (value.includes(',')) {
           value = value.split(',').map(v => v.trim());
           // convert to float if possible
           value = value.map(v => {
@@ -162,13 +184,13 @@ class ViewerControl {
             return isNaN(num) ? v : num;
           });
         }
-        if (value === 'true') {
+        else if (value === 'true') {
           value = true;
         }
         else if (value === 'false') {
           value = false;
         }
-        settings[decodeURIComponent(pair[0])] = value;
+        settings[key] = value;
       }
     }
     return settings;
@@ -178,10 +200,10 @@ class ViewerControl {
   {
     var cameraType = this.settings.camera || "orthographic";
     var aspectRatio = window.innerWidth / window.innerHeight;
+    var viewSize = 10;
     var camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 1000);
 
     if (cameraType === "orthographic") {
-      var viewSize = 10;
       camera = new THREE.OrthographicCamera(
         -aspectRatio * viewSize / 2, aspectRatio * viewSize / 2,
         viewSize / 2, -viewSize / 2,
@@ -191,18 +213,41 @@ class ViewerControl {
     var cameraDistance = 100;
     camera.position.set(cameraDistance, -cameraDistance, cameraDistance);
 
+    // Resize
+    window.addEventListener("resize", () => {
+      console.log("Resize event triggered");
+      
+      var aspect = window.innerWidth / window.innerHeight;
+      if (this.camera.aspect) {
+        this.camera.aspect = aspect;
+      }
+
+      if (this.camera.left) {
+        this.camera.left = -aspect * viewSize / 2;
+        this.camera.right = aspect * viewSize / 2;
+        this.camera.top = viewSize / 2;
+        this.camera.bottom = -viewSize / 2;
+      }
+
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.Render(true)
+    })
+
     return camera;
   }
   SetEdges(enableEdges) {
-    if (typeof enableEdges === 'boolean')
-    {
+    if (typeof enableEdges === 'boolean') {
       this.enableEdges = enableEdges;
     }
   }
-  AddModel(model) {
+  AddModel(model, zoomFit = false) {
+    if (!model)
+      return;
+
     this.models.push(model);
 
-    if (this.enableEdges) {
+    if (this.enableEdges && model.geometry) {
       var edges = new THREE.EdgesGeometry(model.geometry);
       model.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }));
       model.edges.position.copy(model.position);
@@ -210,6 +255,7 @@ class ViewerControl {
     }
 
     this.scene.add(model);
+    this.Render(zoomFit);
   }
   RemoveModel(model) {
     const index = this.models.indexOf(model);
@@ -303,4 +349,138 @@ class ViewerControl {
     this.Render(false);
   }
 
+}
+
+
+class Model3d {
+  constructor() {
+    this.vertices = [];
+    this.faces = [];
+  }
+  AddVertex(x, y, z) {
+    this.vertices.push({ x: x, y: y, z: z });
+  }
+  AddVertices(vertices) {
+    if (!vertices)
+      return;
+
+    if (Array.isArray(vertices)) {
+      for (let i = 0; i < vertices.length; i += 3) {
+        if (i + 2 < vertices.length) {
+          this.AddVertex(vertices[i], vertices[i + 1], vertices[i + 2]);
+        }
+      }
+      return;
+    }
+
+    this.vertices.push(...vertices);
+  }
+  AddFace(indices, color = undefined) {
+
+    if (!Array.isArray(indices))
+    {
+      console.error("Indices must be an array.");
+      return;
+    }
+
+    // check if last indices[indices.lenght] is string
+    if (typeof indices[indices.length - 1] === 'string') {
+      color = indices.pop(); // remove last element if it's a color string
+    }
+    this.faces.push({ indices: indices, color: this.ConvertColor(color) });
+  }
+  AddFaces(faces) {
+    if (!faces)
+      return;
+
+    for (const face of faces) {
+      if (Array.isArray(face)) {
+        this.AddFace(face);
+        continue;
+      }
+      const indices = face.indices ?? [];
+      const color = this.ConvertColor(face.color);
+      this.faces.push({ indices: indices, color: color });
+    }
+  }
+  ConvertColor(c) {
+    var color = { r: 0.5, g: 0.5, b: 0.5, a: 1.0 }; // Default gray color
+    if (c === undefined || c === null) {
+      return color;
+    }
+    if (typeof c === 'object') {
+      const { r, g, b, a } = c;
+      color.r = r;
+      color.g = g;
+      color.b = b;
+      color.a = a !== undefined ? a : 1.0; // Default alpha to 1.0 if not provided
+    }
+    else if (typeof c === 'string') {
+      // If color is a string, parse it as a hex color
+      const hexColor = new THREE.Color(c);
+      color.r = hexColor.r;
+      color.g = hexColor.g;
+      color.b = hexColor.b;
+      color.a = 1.0; // Default alpha to 1.0
+    }
+    else if (typeof c === 'number') {
+      // If color is a number, assume it's a hex value
+      const hexColor = new THREE.Color(c);
+      color.r = hexColor.r;
+      color.g = hexColor.g;
+      color.b = hexColor.b;
+      color.a = 1.0; // Default alpha to 1.0
+    }
+    return color;
+  }
+  CreateMesh() {
+    if (this.vertices.length === 0 || this.faces.length === 0) {
+      console.error("Model3d must have at least one vertex and one face.");
+      return null;
+    }
+
+    const geometry = new THREE.BufferGeometry();
+
+    const vertices = this.vertices.flatMap(vertex => [vertex.x, vertex.y, vertex.z]);
+    const faces = this.faces.map(f => {
+      const indices = f.indices ?? [];
+      const color = {
+        r: f.color.r ?? 1.0,
+        g: f.color.g ?? 1.0,
+        b: f.color.b ?? 1.0,
+        a: f.color.a ?? 1.0
+      };
+      return { indices, color };
+    });
+
+    const materials = [];
+    for (const face of faces) {
+      const color = new THREE.Color(face.color.r, face.color.g, face.color.b);
+      const material = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: face.color.a < 1.0,
+        opacity: face.color.a
+      });
+      materials.push(material);
+    }
+
+    const indices = [];
+    var index = 0;
+    for (const face of faces) {
+      // for each 3 indices
+      var currentIndex = indices.length;
+      indices.push(...face.indices);
+      geometry.addGroup(currentIndex, indices.length - currentIndex, index);
+      index++;
+    }
+
+    geometry.setIndex(indices);
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+
+    geometry.computeVertexNormals();
+
+    const mesh = new THREE.Mesh(geometry, materials);
+
+    return mesh;
+  }
 }
