@@ -118,6 +118,9 @@ class ViewerControl {
       for (let i = 0; i < cube; i++) {
         this.CreateCube();
       }
+      if (cube == 0) {
+        this.CreateCube("#E67373"); // Default color if no cube count is specified
+      }
     }
 
     if (this.settings.model) {
@@ -364,8 +367,10 @@ class ViewerControl {
     }
   }
   ZoomFit() {
-    function zoomCameraToSelection(camera, controls, selection, fitOffset = 1.2) {
+    function zoomCameraToSelection(camera, controls, selection, fitOffset = 1.0) {
       const box = new THREE.Box3();
+
+      fitOffset *= 2.0; // Adjust fit offset for better visibility
 
       for (const object of selection) box.expandByObject(object);
 
@@ -398,7 +403,7 @@ class ViewerControl {
         controls.update();
       }
       else if (camera.isOrthographicCamera) {
-        var radius = Math.max(size.x, size.y, size.z) * 1.5;
+        var radius = Math.max(size.x, size.y, size.z);
         if (radius === 0) {
           radius = 1; // prevent division by zero
         }
