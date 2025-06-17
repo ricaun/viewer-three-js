@@ -93,8 +93,12 @@ class ViewerControl {
     this.SetEdges(this.settings.edges);
 
     this.CreateLight();
-    if (this.settings.cube) {
-      this.CreateCube();
+
+    var cube = this.settings.cube;
+    if (cube) {
+      for (let i = 0; i < cube; i++) {
+        this.CreateCube();
+      }
     }
 
     if (this.settings.model) {
