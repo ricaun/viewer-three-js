@@ -192,7 +192,7 @@ THREE.SVGRenderer = function () {
 
 			var element = _elements[ e ];
 			var material = element.material;
-
+			console.log( 'THREE.SVGRenderer.render', element, material );
 			if ( material === undefined || material.opacity === 0 ) continue;
 
 			_elemBox.makeEmpty();
@@ -403,15 +403,22 @@ THREE.SVGRenderer = function () {
 		var path = 'M' + convert( v1.positionScreen.x ) + ',' + convert( v1.positionScreen.y ) + 'L' + convert( v2.positionScreen.x ) + ',' + convert( v2.positionScreen.y ) + 'L' + convert( v3.positionScreen.x ) + ',' + convert( v3.positionScreen.y ) + 'z';
 		var style = '';
 
+		var isMultiMaterial = Array.isArray( material );
+		if (isMultiMaterial)
+		{
+			var materialIndex = 0;
+			material = material[ materialIndex ];
+		}
+
+		var materialColor = material.color ?? new THREE.Color( 0xffffff )
 		if (material.color === undefined)
 		{
-			console.log( 'THREE.SVGRenderer: material.color is undefined, using default color.' );
-			material.color = new THREE.Color( 0xaaaaaa );
+			console.log( 'THREE.SVGRenderer: material.color is undefined, using default color.' , material, element);
 		}
 
 		if ( material.isMeshBasicMaterial ) {
 
-			_color.copy( material.color );
+			_color.copy( materialColor );
 
 			if ( material.vertexColors ) {
 
@@ -421,9 +428,9 @@ THREE.SVGRenderer = function () {
 
 		} else if ( material.isMeshLambertMaterial || material.isMeshPhongMaterial || material.isMeshStandardMaterial ) {
 
-			_diffuseColor.copy( material.color );
+			_diffuseColor.copy( materialColor );
 
-			if ( material.vertexColorss ) {
+			if ( material.vertexColors ) {
 
 				_diffuseColor.multiply( element.color );
 

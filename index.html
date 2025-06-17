@@ -128,7 +128,16 @@
                 console.log(file);
                 const reader = new FileReader();
                 reader.addEventListener('load', (event) => {
-                    LoadDotBim(event.target.result);
+                    var content = event.target.result;
+                    /*
+                    console.log(content);
+                    var json = JSON.parse(content);
+                    var g = off_mesh(json);
+                    scene.add(g);
+                    zoomCameraToSelection(camera, controls, scene.children);
+                    render();
+                    */
+                    LoadDotBim(content);
                 });
                 reader.readAsText(file);
             }
@@ -450,7 +459,58 @@
         //LoadDotBim(JSON.stringify(dotbim_cube));
         //LoadDotBim(JSON.stringify(dotbim_banana));
         //CreateCube(0xE67373);
-        CreateCube(0xeeeeee);
+        {
+
+            var geo = off_mesh();
+            scene.add(geo);
+
+            // create a face 
+            var bufferGeometry = new THREE.BufferGeometry();
+            var indices = new Uint16Array([0, 1, 2, 3, 4, 5, 2, 5, 4, 1, 2, 4]);
+            bufferGeometry.setIndex(new THREE.BufferAttribute(indices, 1));
+
+
+            var vertices = new Float32Array([
+                -1, -1, 0,
+                1, -1, 0,
+                0, 1, 0,
+                -1, -1, 1,
+                1, -1, 1,
+                0, 1, 1,
+            ]);
+            
+            bufferGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            //bufferGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            bufferGeometry.computeVertexNormals();
+            var material = new THREE.MeshBasicMaterial({ 
+                side: THREE.OneSide, 
+                color: new THREE.Color(0x33333ff), 
+                //vertexColors: true
+            });
+
+            bufferGeometry.addGroup( 0, 3, 0 ); // materialIndex 0
+            bufferGeometry.addGroup( 3, 3, 1 ); // materialIndex 1
+            bufferGeometry.addGroup( 6, 3, 2 ); // materialIndex 2
+            bufferGeometry.addGroup( 9, 3, 3 ); // materialIndex 3
+
+            var materials = [
+                new THREE.MeshLambertMaterial( { color: 0xff0000 } ),
+                new THREE.MeshStandardMaterial( { color: 0x00ff00 } ),
+                new THREE.MeshPhongMaterial( { color: 0x0000ff } ),
+                new THREE.MeshDepthMaterial(),
+                new THREE.MeshNormalMaterial(),
+                new THREE.MeshBasicMaterial( { wireframe: true } ),
+            ];
+
+            var triangle = new THREE.Mesh(bufferGeometry, materials);
+            triangle.position.set(0, 0, 0);
+            scene.add(triangle);
+            
+            zoomCameraToSelection(camera, controls, scene.children);
+            render();
+        }
+
+        //CreateCube(0xeeeeee);
 
     </script>
 </body>
