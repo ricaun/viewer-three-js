@@ -90,6 +90,19 @@ class ViewerControl {
       event.preventDefault();
     });
 
+    // Handle double-click with middle or right mouse button to zoom fit
+    let lastClickTime = 0;
+    const DOUBLE_CLICK_DELAY = 400; // milliseconds
+    this.renderer.domElement.addEventListener('mousedown', (event) => {
+      if (event.button === 1 || event.button === 2) { // Middle or right mouse button
+        const now = Date.now();
+        if (now - lastClickTime < DOUBLE_CLICK_DELAY) {
+          this.Render(true);
+        }
+        lastClickTime = now;
+      }
+    });
+
     this.SetPosition(this.settings.position);
     this.SetEdges(this.settings.edges);
 
