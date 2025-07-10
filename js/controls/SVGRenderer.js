@@ -2,6 +2,7 @@
  * @author mrdoob / http://mrdoob.com/
  * @source https://github.com/alexlenail/NN-SVG/blob/master/SVGRenderer.js
  * @same https://github.com/jasonChen1982/three.interaction.js/blob/master/examples/libs/three/examples/js/renderers/SVGRenderer.js
+ * https://github.com/mrdoob/three.js/tree/r147/examples/jsm/renderers
  * edited by ricaun to support THREE.js r147
  */
 
