@@ -1,6 +1,41 @@
 # viewer.three.js
 
+This is a simple viewer using three version 147. This version allow to run in a single page application.
+
 ## Settings
+
+### position
+
+`position` allow change the camera position in the main viewer.
+
+* `position=0,0,100` change camera position to z down. 
+* `position=100,-100,100` change camera position look (x,-y,z). (default position)
+
+### edges
+
+`edges` allow to change the edges in the models.
+
+* `edges=false` disable edges in the models viewer.
+
+### camera
+
+`camera` allow o change to `perspective` or `orthographic` camera.
+
+* `camera=perspective` change camera to perspective.
+* `camera=orthographic` change camera to orthographic. (default camera)
+
+### light
+
+`light` allow to enable light in `directional`.
+
+* `light=directional` enable directional light.
+
+### color
+
+`color` allow to change background color.
+
+* `color=eeeeee` change background to color `eeeeee`.
+* `color=222` change background to color `222`. (default color)
 
 ### model
 
