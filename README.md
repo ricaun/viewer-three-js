@@ -68,8 +68,10 @@ The `model` pattern is similar like [OFF (file format)](https://en.wikipedia.org
 #### model example
 
 This is a cube with different color faces: 
-[Preview Json](https://ricaun.github.io/viewer-three-js/#model={%20%22vertices%22:%20[-1,%20-1,%20-1,%201,%20-1,%20-1,%201,%201,%20-1,%20-1,%201,%20-1,%20-1,%20-1,%201,%201,%20-1,%201,%201,%201,%201,%20-1,%201,%201],%20%22faces%22:%20[[0,%202,%201,%202,%200,%203,%20%22#ff0000%22],%20[4,%205,%206,%204,%206,%207,%20%22#00ff00%22],%20[0,%201,%205,%200,%205,%204,%20%22#ff00ff%22],%20[1,%202,%206,%201,%206,%205,%20%22#00ffff%22],%20[2,%203,%207,%202,%207,%206,%20%22#ff8800%22],%20[3,%200,%204,%203,%204,%207,%20%22#8800ff%22]]%20})
-[Preview Base64](https://ricaun.github.io/viewer-three-js/index.html#model=eyAidmVydGljZXMiOiBbLTEsIC0xLCAtMSwgMSwgLTEsIC0xLCAxLCAxLCAtMSwgLTEsIDEsIC0xLCAtMSwgLTEsIDEsIDEsIC0xLCAxLCAxLCAxLCAxLCAtMSwgMSwgMV0sICJmYWNlcyI6IFtbMCwgMiwgMSwgMiwgMCwgMywgIiNmZjAwMDAiXSwgWzQsIDUsIDYsIDQsIDYsIDcsICIjMDBmZjAwIl0sIFswLCAxLCA1LCAwLCA1LCA0LCAiI2ZmMDBmZiJdLCBbMSwgMiwgNiwgMSwgNiwgNSwgIiMwMGZmZmYiXSwgWzIsIDMsIDcsIDIsIDcsIDYsICIjZmY4ODAwIl0sIFszLCAwLCA0LCAzLCA0LCA3LCAiIzg4MDBmZiJdXSB9)
+
+* [Preview Json](https://ricaun.github.io/viewer-three-js/#model={%20%22vertices%22:%20[-1,%20-1,%20-1,%201,%20-1,%20-1,%201,%201,%20-1,%20-1,%201,%20-1,%20-1,%20-1,%201,%201,%20-1,%201,%201,%201,%201,%20-1,%201,%201],%20%22faces%22:%20[[0,%202,%201,%202,%200,%203,%20%22#ff0000%22],%20[4,%205,%206,%204,%206,%207,%20%22#00ff00%22],%20[0,%201,%205,%200,%205,%204,%20%22#ff00ff%22],%20[1,%202,%206,%201,%206,%205,%20%22#00ffff%22],%20[2,%203,%207,%202,%207,%206,%20%22#ff8800%22],%20[3,%200,%204,%203,%204,%207,%20%22#8800ff%22]]%20})
+
+* [Preview Base64](https://ricaun.github.io/viewer-three-js/index.html#model=eyAidmVydGljZXMiOiBbLTEsIC0xLCAtMSwgMSwgLTEsIC0xLCAxLCAxLCAtMSwgLTEsIDEsIC0xLCAtMSwgLTEsIDEsIDEsIC0xLCAxLCAxLCAxLCAxLCAtMSwgMSwgMV0sICJmYWNlcyI6IFtbMCwgMiwgMSwgMiwgMCwgMywgIiNmZjAwMDAiXSwgWzQsIDUsIDYsIDQsIDYsIDcsICIjMDBmZjAwIl0sIFswLCAxLCA1LCAwLCA1LCA0LCAiI2ZmMDBmZiJdLCBbMSwgMiwgNiwgMSwgNiwgNSwgIiMwMGZmZmYiXSwgWzIsIDMsIDcsIDIsIDcsIDYsICIjZmY4ODAwIl0sIFszLCAwLCA0LCAzLCA0LCA3LCAiIzg4MDBmZiJdXSB9)
 
 ```
 model={ "vertices": [-1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1, -1, -1, 1, 1, -1, 1, 1, 1, 1, -1, 1, 1], "faces": [[0, 2, 1, 2, 0, 3, "#ff0000"], [4, 5, 6, 4, 6, 7, "#00ff00"], [0, 1, 5, 0, 5, 4, "#ff00ff"], [1, 2, 6, 1, 6, 5, "#00ffff"], [2, 3, 7, 2, 7, 6, "#ff8800"], [3, 0, 4, 3, 4, 7, "#8800ff"]] }
