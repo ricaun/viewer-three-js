@@ -1,6 +1,8 @@
 # viewer.three.js
 
-This is a simple viewer using three version 147. This version allow to run in a single page application.
+Simple viewer with [three.js](https://github.com/mrdoob/three.js) using release version [r147](https://github.com/mrdoob/three.js/releases/tag/r147).
+
+Here is an [Online Preview](https://ricaun.github.io/viewer-three-js/#cube=1).
 
 ## Settings
 
