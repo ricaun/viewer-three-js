@@ -138,6 +138,15 @@ class ViewerControl {
   }
 
   CreateMesh(data) {
+    if (typeof data === 'string') {
+      // base64 decode string to json
+      try {
+        data = JSON.parse(atob(data));
+      } catch (e) {
+        console.error("Error parsing model JSON:", e);
+        return;
+      }
+    }
     try {
       var { vertices, faces, position, rotation, quaternion, scale } = data;
       var model = new Model3d();
