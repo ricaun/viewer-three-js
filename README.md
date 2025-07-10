@@ -86,7 +86,3 @@ This package is [licensed](LICENSE) under the [MIT License](https://en.wikipedia
 ---
 
 Do you like this package? Please [star this project on GitHub](../../stargazers)!
-
----
-
-Copyright © ricaun 2025
