@@ -35,6 +35,29 @@
 <body>
     <script>
         Viewer.Init();
+        
+        document.addEventListener("keydown", function(event) {
+            if (event.ctrlKey && event.key === 'p') {
+                event.preventDefault();
+                Viewer.Print();
+            }
+            if (event.ctrlKey && event.key === 'o') {
+                var width = window.innerWidth;
+                var height = window.innerHeight;
+                if (width > height) {
+                    height = width;
+                } else {
+                    width = height;
+                }
+                event.preventDefault();
+                Viewer.Print(width, height, "model-square.png");
+            }
+            if (event.ctrlKey && event.key === 'i') {
+                event.preventDefault();
+                Viewer.Print(320, 320, "model-320x320.png");
+            }
+        });
+
         //Viewer.Cube();
         
         /*

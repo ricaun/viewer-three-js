@@ -10,6 +10,13 @@ class Viewer {
       console.error("ViewerControl is not initialized.");
     }
   }
+  static Print(width = 0, height = 0, filename = "model.png") {
+    if (Viewer.ViewerControl) {
+      Viewer.ViewerControl.DownloadPng(width, height, filename);
+    } else {
+      console.error("ViewerControl is not initialized.");
+    }
+  }
   static Cube() {
     if (Viewer.ViewerControl) {
       Viewer.ViewerControl.CreateCube();
@@ -290,24 +297,33 @@ class ViewerControl {
 
     // Resize
     window.addEventListener("resize", () => {
-      var aspect = window.innerWidth / window.innerHeight;
-      if (this.camera.aspect) {
-        this.camera.aspect = aspect;
-      }
-
-      if (this.camera.left) {
-        this.camera.left = -aspect * viewSize / 2;
-        this.camera.right = aspect * viewSize / 2;
-        this.camera.top = viewSize / 2;
-        this.camera.bottom = -viewSize / 2;
-      }
-
-      this.camera.updateProjectionMatrix();
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.Render(true)
+      this.UpdateSize();
     })
 
     return camera;
+  }
+  UpdateSize(width = 0, height = 0)
+  {
+    if (width <= 0 || height <= 0) {
+      width = window.innerWidth;
+      height = window.innerHeight;
+    }
+    var viewSize = 10;
+    var aspect = width / height;
+    if (this.camera.aspect) {
+      this.camera.aspect = aspect;
+    }
+
+    if (this.camera.left) {
+      this.camera.left = -aspect * viewSize / 2;
+      this.camera.right = aspect * viewSize / 2;
+      this.camera.top = viewSize / 2;
+      this.camera.bottom = -viewSize / 2;
+    }
+
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(width, height);
+    this.Render(true)
   }
   SetEdges(enableEdges) {
     if (typeof enableEdges === 'boolean') {
@@ -437,6 +453,43 @@ class ViewerControl {
     this.Render(false);
   }
 
+  DownloadPng(width = 0, height = 0, filename = "model.png") {
+    function downloadDataUrlFromJavascript(filename, dataUrl) {
+        // Construct the 'a' element
+        var link = document.createElement("a");
+        link.download = filename;
+        link.target = "_blank";
+
+        // Construct the URI
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+
+        // Cleanup the DOM
+        document.body.removeChild(link);
+    }
+
+    let renderWidth = window.innerWidth;
+    let renderHeight = window.innerHeight;
+
+    if (width > 0 && height > 0) {
+        renderWidth = width;
+        renderHeight = height;
+    }
+
+    this.UpdateSize(renderWidth, renderHeight);
+
+    let clearAlpha = this.renderer.getClearAlpha ();
+    this.renderer.setClearAlpha (0.0);
+    this.renderer.setSize (renderWidth, renderHeight);
+    this.Render(true);
+    const imgDataUrl = this.renderer.domElement.toDataURL();
+    downloadDataUrlFromJavascript(filename, imgDataUrl);
+
+    this.renderer.setClearAlpha (clearAlpha);
+    this.UpdateSize();
+    this.Render(true);
+  }
 }
 
 
