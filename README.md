@@ -2,41 +2,53 @@
 
 Simple viewer with [three.js](https://github.com/mrdoob/three.js) using release version [r147](https://github.com/mrdoob/three.js/releases/tag/r147).
 
-Here is an [Online Preview](https://ricaun.github.io/viewer-three-js/#cube=1).
+Here is an [Online Preview](https://ricaun.github.io/viewer-three-js/#cube=1) with cube.
 
 ## Settings
+
+Settings is used to add setting configuration using the url with special # and &.
+
+Like: `https://ricaun.github.io/viewer-three-js/#cube=1&camera=perspective` [Preview](https://ricaun.github.io/viewer-three-js/#cube=1&camera=perspective)
+
+### cube
+
+`cube` allow to create random cube in the main viewer.
+* `cube=0` create one cube with color. [Preview](https://ricaun.github.io/viewer-three-js/#cube=0)
+* `cube=1` create one cube. [Preview](https://ricaun.github.io/viewer-three-js/#cube=1)
+* `cube=2` create two cubes. [Preview](https://ricaun.github.io/viewer-three-js/#cube=2)
+* `cube=$` create any cubes. [Preview](https://ricaun.github.io/viewer-three-js/#cube=5)
 
 ### position
 
 `position` allow change the camera position in the main viewer.
 
-* `position=0,0,100` change camera position to z down. 
+* `position=0,0,100` change camera position to z down. [Preview](https://ricaun.github.io/viewer-three-js/#cube=1&position=0,0,100)
 * `position=100,-100,100` change camera position look (x,-y,z). (default position)
 
 ### edges
 
 `edges` allow to change the edges in the models.
 
-* `edges=false` disable edges in the models viewer.
+* `edges=false` disable edges in the models viewer. [Preview](https://ricaun.github.io/viewer-three-js/#cube=1&edges=false)
 
 ### camera
 
 `camera` allow o change to `perspective` or `orthographic` camera.
 
-* `camera=perspective` change camera to perspective.
+* `camera=perspective` change camera to perspective. [Preview](https://ricaun.github.io/viewer-three-js/#cube=1&camera=perspective)
 * `camera=orthographic` change camera to orthographic. (default camera)
 
 ### light
 
 `light` allow to enable light in `directional`.
 
-* `light=directional` enable directional light.
+* `light=directional` enable directional light. [Preview](https://ricaun.github.io/viewer-three-js/#cube=0&light=directional)
 
 ### color
 
 `color` allow to change background color.
 
-* `color=eeeeee` change background to color `eeeeee`.
+* `color=eeeeee` change background to color `eeeeee`. [Preview](https://ricaun.github.io/viewer-three-js/#cube=1&color=eeeeee)
 * `color=222` change background to color `222`. (default color)
 
 ### model
@@ -47,17 +59,13 @@ The `model` pattern is similar like [OFF (file format)](https://en.wikipedia.org
 
 * `model={"vertices":[...],"faces"=[[...]]}`
 
+#### model example
+
+This is a cube with different color faces: [Preview](https://ricaun.github.io/viewer-three-js/#model={ "vertices": [-1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1, -1, -1, 1, 1, -1, 1, 1, 1, 1, -1, 1, 1], "faces": [[0, 2, 1, 2, 0, 3, "#ff0000"], [4, 5, 6, 4, 6, 7, "#00ff00"], [0, 1, 5, 0, 5, 4, "#ff00ff"], [1, 2, 6, 1, 6, 5, "#00ffff"], [2, 3, 7, 2, 7, 6, "#ff8800"], [3, 0, 4, 3, 4, 7, "#8800ff"]] })
+
 ```
 model={ "vertices": [-1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1, -1, -1, 1, 1, -1, 1, 1, 1, 1, -1, 1, 1], "faces": [[0, 2, 1, 2, 0, 3, "#ff0000"], [4, 5, 6, 4, 6, 7, "#00ff00"], [0, 1, 5, 0, 5, 4, "#ff00ff"], [1, 2, 6, 1, 6, 5, "#00ffff"], [2, 3, 7, 2, 7, 6, "#ff8800"], [3, 0, 4, 3, 4, 7, "#8800ff"]] }
 ```
-
-### cube
-
-`cube` allow to create random cube in the main viewer.
-* `cube=0` create one cube with color.
-* `cube=1` create one cube.
-* `cube=2` create two cubes.
-* `cube=$` create any cubes.
 
 --- 
 
