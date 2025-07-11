@@ -36,6 +36,7 @@ Like: `https://ricaun.github.io/viewer-three-js/#cube=1&camera=perspective` [Pre
 `edges` allow to change the edges in the models.
 
 * `edges=false` disable edges in the models viewer. [Preview](https://ricaun.github.io/viewer-three-js/#cube=1&edges=false)
+* `edges=ffffff` change edges color in the models viewer. [Preview](https://ricaun.github.io/viewer-three-js/#cube=0&edges=ffffff)
 
 ### camera
 

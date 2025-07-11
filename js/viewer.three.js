@@ -46,6 +46,7 @@ class ViewerControl {
   settings = {};
 
   enableEdges = true;
+  edgeColor = new THREE.Color(0x000000); // Default edge color
 
   controls = undefined;
   camera = undefined;
@@ -338,6 +339,11 @@ class ViewerControl {
     if (typeof enableEdges === 'boolean') {
       this.enableEdges = enableEdges;
     }
+    if (typeof enableEdges === 'string') {
+      enableEdges = enableEdges.trim().toLowerCase();
+      if (!enableEdges.startsWith('#')) enableEdges = '#' + enableEdges;
+      this.edgeColor = new THREE.Color(enableEdges);
+    }
   }
   AddModel(model, zoomFit = false) {
     if (!model)
@@ -347,7 +353,7 @@ class ViewerControl {
 
     if (this.enableEdges && model.geometry) {
       var edges = new THREE.EdgesGeometry(model.geometry);
-      model.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }));
+      model.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: this.edgeColor }));
       model.edges.position.copy(model.position);
       model.edges.rotation.copy(model.rotation);
       model.edges.scale.copy(model.scale);
