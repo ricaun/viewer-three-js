@@ -25,14 +25,6 @@ class Viewer {
     }
   }
   static Model(data) {
-    if (typeof data === 'string') {
-      try {
-        data = JSON.parse(data);
-      } catch (e) {
-        console.error("Error parsing model JSON:", e);
-        return;
-      }
-    }
     if (Viewer.ViewerControl) {
       Viewer.ViewerControl.CreateMesh(data);
     } else {
@@ -140,12 +132,16 @@ class ViewerControl {
 
   CreateMesh(data) {
     if (typeof data === 'string') {
-      // base64 decode string to json
       try {
-        data = JSON.parse(atob(data));
+        data = JSON.parse(data);
       } catch (e) {
-        console.error("Error parsing model JSON:", e);
-        return;
+        // base64 decode string to json
+        try {
+          data = JSON.parse(atob(data));
+        } catch (e) {
+          console.error("Error parsing model JSON:", e);
+          return;
+        }
       }
     }
     try {
